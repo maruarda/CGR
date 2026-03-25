@@ -1,0 +1,36 @@
+# Executáveis
+*.exe
+*.out
+*.app
+
+# Objetos / intermediários
+*.o
+*.obj
+*.lo
+*.la
+*.al
+
+# Bibliotecas compiladas
+*.a
+*.lib
+*.dll
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Pastas de build
+build/
+bin/
+GL/
+glad/
+KHR/
+
+# VSCode
+.vscode/
+
+# Outros
+*.stackdump
+teste.c
+glad.c
+
