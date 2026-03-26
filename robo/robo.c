@@ -1,3 +1,4 @@
+
 #define GLFW_INCLUDE_NONE
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,8 +75,8 @@ void setupRC(){
     // Set Material properties to follow glColor values  
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);  
   
-    // Black blue background  
-    glClearColor(0.53f, 0.81f, 0.98f, 1.0f);  
+    // lavanda 
+    glClearColor(0.9f, 0.9f, 0.98f, 1.0f);  
 
 }  
 
@@ -151,155 +152,15 @@ void drawGLScene(GLFWwindow* window)
 	pObj = gluNewQuadric();  
 	gluQuadricNormals(pObj, GLU_SMOOTH);  
 
-	// white
-	glColor3f(1.0f, 1.0f, 1.0f);  
+    //verde
+	glColor3f(0.56f, 0.93f, 0.53f);  
 
 	// Main Body  
-//	gluSphere();  // Bottom
 	glPushMatrix(); // save transform matrix state
 		glTranslatef(0.0f, 0.0f, 0.0f);
+        glScalef(1.5f, 0.8f, 1.0f);
 		gluSphere(pObj, 0.48f, 52, 26);
 	glPopMatrix(); // restore transform matrix state
-
-	// Mid section
-	glPushMatrix(); // save transform matrix state
-		glTranslatef(0.0f, 0.5f, 0.0f);
-		gluSphere(pObj, 0.36f, 39, 19.5);
-	glPopMatrix(); // restore transform matrix state
-
-	// Head
-	glPushMatrix(); // save transform matrix state
-		glTranslatef(0.0f, 1.0f, 0.0f);
-		gluSphere(pObj, 0.24f, 26, 13);
-	glPopMatrix(); // restore transform matrix state
-
-	// Nose (orange)
-	glColor3f(1.0f, 0.55f, 0.0f);  
-	glPushMatrix();
-		glTranslatef(0.0f, 1.0f, 0.2f);
-		gluCylinder(pObj, 0.04f, 0.0f, 0.3f, 26, 13);  
-	glPopMatrix();  
-
-	// Eyes (black)
-    glColor3f(0.1f, 0.1f, 0.1f);
-// glColor, glPushMatrix,...
-    // olho esquerdo
-    glPushMatrix();
-        glTranslatef(-0.08f, 1.05f, 0.20f);
-        gluSphere(pObj, 0.03f, 20, 20);
-    glPopMatrix();
-
-    // olho direito
-    glPushMatrix();
-        glTranslatef(0.08f, 1.05f, 0.20f);
-        gluSphere(pObj, 0.03f, 20, 20);
-    glPopMatrix();
-
-    //botoezinhos
-    //glTranslatef(0.0f, 0.5f, 0.0f);meio
-    glColor3f(0.1f, 0.1f, 0.1f);
-    // 1
-    glPushMatrix();
-        glTranslatef(0.0f, 0.65f, 0.30f);
-        gluSphere(pObj, 0.04f, 25, 25);
-    glPopMatrix();
-    // 2
-    glPushMatrix();
-        glTranslatef(0.0f, 0.55f, 0.33f);
-        gluSphere(pObj, 0.04f, 25, 25);
-    glPopMatrix();
-     // 3
-    glPushMatrix();
-        glTranslatef(0.0f, 0.45f, 0.33f);
-        gluSphere(pObj, 0.04f, 25, 25);
-    glPopMatrix();
-
-	// Hat
-	glColor3f(0.29f, 0.0f, 0.51f);  
-	glPushMatrix();
-		glTranslatef(0.0f, 1.2f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); // gira Z → Y
-		gluCylinder(pObj, 0.20f, 0.0f, 0.7f, 26, 13);  
-	glPopMatrix();
-
-	// Hat brim
-    glColor3f(0.29f, 0.0f, 0.51f);  
-	glPushMatrix();
-        glTranslatef(0.0f, 1.18f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-
-        // lateral
-        gluCylinder(pObj, 0.45f, 0.45f, 0.04f, 26, 13);
-
-        // base (corrigida)
-        glPushMatrix();
-            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
-            gluDisk(pObj, 0.0f, 0.45f, 26, 13);
-        glPopMatrix();
-
-        // topo
-        glTranslatef(0.0f, 0.0f, 0.04f);
-        gluDisk(pObj, 0.0f, 0.45f, 26, 13);
-    glPopMatrix();
-
-    //cinto do chapeu
-    glColor3f(0.1f, 0.1f, 0.1f);  
-	glPushMatrix();
-		glTranslatef(0.0f, 1.2f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-
-        gluCylinder(pObj, 0.22f, 0.22f, 0.08f, 26, 13);
-
-        gluDisk(pObj, 0.0f, 0.22f, 26, 13);
-        glTranslatef(0.0f, 0.0f, 0.06f);
-        gluDisk(pObj, 0.0f, 0.22f, 26, 13);
-
-	glPopMatrix();
-     
-    //cachecol
-    glColor3f(1.0f, 0.14f, 0.0f);  
-	glPushMatrix();
-		glTranslatef(0.0f, 0.8f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-
-        gluCylinder(pObj, 0.2f, 0.2f, 0.1f, 26, 13);
-
-        gluDisk(pObj, 0.0f, 0.2f, 26, 13);
-        glTranslatef(0.0f, 0.0f, 0.01f);
-        gluDisk(pObj, 0.0f, 0.2f, 26, 13);
-	glPopMatrix();
-
-    // ponta do cachecol
-    glColor3f(1.0f, 0.14f, 0.0f);
-    glPushMatrix();
-        glTranslatef(0.13f, 0.87f, 0.14f); // posição na frente
-
-        glRotatef(90.0f, 1.0f, 0.0f, 0.0f); // aponta pra baixo
-
-        gluCylinder(pObj, 0.05f, 0.04f, 0.3f, 20, 10);
-    glPopMatrix();
-
-    //braço esquerdo
-    glColor3f(0.1f, 0.1f, 0.1f);
-    glPushMatrix();
-        glTranslatef(0.0f, 0.6f, 0.0f); // posição na frente
-
-        glRotatef(-90, 0,1,0);
-
-        gluCylinder(pObj, 0.015f, 0.015f, 1.0f, 20, 10);
-
-    glPopMatrix();
-
-    //braço direito
-    glColor3f(0.1f, 0.1f, 0.1f);
-    glPushMatrix();
-        glTranslatef(0.0f, 0.6f, 0.0f); // posição na frente
-
-        glRotatef(90, 0,1,0);
-
-        gluCylinder(pObj, 0.015f, 0.015f, 1.0f, 20, 10);
-
-    glPopMatrix();
 
     // Restore the matrix state  
     glPopMatrix();  
@@ -313,7 +174,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Boneco", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Robozinho", NULL, NULL);
     if (window == NULL)
     {
         printf("Failed to open GLFW window\n");
