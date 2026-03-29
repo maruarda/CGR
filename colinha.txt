@@ -1,0 +1,4 @@
+compilar: 
+ gcc src/castelo.c -o teste.exe -Iinclude -Llib/x64 -lglfw3 -lopengl32 -lglu32 -lgdi32
+
+.\teste.exe
