@@ -11,7 +11,9 @@
 *.al
 
 # Bibliotecas compiladas
-
+*.a
+*.lib
+*.dll
 
 # Arquivos temporários
 *.log
@@ -19,12 +21,16 @@
 
 # Pastas de build
 build/
-
+bin/
+GL/
+glad/
+KHR/
+include/
 
 # VSCode
 .vscode/
 
 # Outros
 *.stackdump
-
-
+teste.c
+glad.c
