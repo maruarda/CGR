@@ -1,4 +1,6 @@
 #define GLFW_INCLUDE_NONE
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <GLFW/glfw3.h>  // Header File For The GLFW Library
@@ -129,6 +131,67 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     if (xRot < -89.0f) xRot = -89.0f;
 }
 
+GLuint carregarTextura(const char* caminho) {
+    GLuint texturaID;
+    glGenTextures(1, &texturaID);
+    glBindTexture(GL_TEXTURE_2D, texturaID);
+
+    // Parâmetros de filtragem
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int largura, altura, canais;
+    stbi_set_flip_vertically_on_load(true); 
+    unsigned char* dados = stbi_load(caminho, &largura, &altura, &canais, 0);
+
+    if (dados) {
+        printf("Sucesso: Imagem %s carregada (%dx%d)\n", caminho, largura, altura);
+        GLenum formato = (canais == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, formato, largura, altura, 0, formato, GL_UNSIGNED_BYTE, dados);
+        // glGenerateMipmap foi removida para evitar o erro de declaração implícita
+    } else {
+        printf("Erro ao carregar textura: %s\n", caminho);
+    }
+
+    stbi_image_free(dados);
+    return texturaID;
+}
+
+void desenharFundo(GLuint id) {
+    glDisable(GL_DEPTH_TEST); 
+    
+    glMatrixMode(GL_PROJECTION); // [cite: 369]
+    glPushMatrix(); // [cite: 382]
+    glLoadIdentity(); // [cite: 379]
+    gluOrtho2D(0, 800, 0, 600); 
+
+    glMatrixMode(GL_MODELVIEW); // [cite: 368]
+    glPushMatrix();
+    glLoadIdentity();
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glEnable(GL_TEXTURE_2D); // [cite: 196]
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glBegin(GL_QUADS); // [cite: 218]
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(800.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(800.0f, 600.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, 600.0f);
+    glEnd(); // [cite: 209]
+
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix(); // [cite: 385]
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    
+    glEnable(GL_DEPTH_TEST); 
+}
+
 void desenharCubo(float w, float h, float d) {
     w /= 2.0f;
     d /= 2.0f;
@@ -178,37 +241,22 @@ void desenharCubo(float w, float h, float d) {
     glEnd();
 }
 
-void desenharJanela(GLUquadricObj *pObj, float raio) {
-    glPushMatrix();
-        glColor3f(0.1f, 0.1f, 0.1f); // Cor escura (vidro) [cite: 106]
-        // gluDisk(objeto, raio_interno, raio_externo, fatias, loops) 
-        gluDisk(pObj, 0.0f, raio, 20, 1); 
-    glPopMatrix();
-}
-
-/* Funções auxiliares para organizar o desenho das quádricas */
 void desenharTorre(GLUquadricObj *pObj, float x, float y, float z) {
     glPushMatrix();
         glTranslatef(x, y, z);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); // Gira para alinhar o cilindro verticalmente
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); 
 
         // Corpo da Torre 
-        glColor3f(0.5f, 0.5f, 0.5f);
+        glColor3f(1.0f, 0.75f, 0.8f);
         gluCylinder(pObj, 0.3f, 0.3f, 1.5f, 26, 13);
         gluDisk(pObj, 0.0f, 0.3f, 26, 1);
-
-        // --- ADICIONANDO A JANELA ---
-        // glPushMatrix();
-        //     glTranslatef(0.0f, 1.2f, 0.41f); 
-        //     desenharJanela(pObj, 0.15f); // Janela com raio 0.15
-        // glPopMatrix();
 
         // Telhado
         glPushMatrix();
             glTranslatef(0.0f, 0.0f, 1.49f);
-            glColor3f(0.4f, 0.1f, 0.6f);
-            gluCylinder(pObj, 0.45f, 0.0f, 0.75f, 26, 13);
+            glColor3f(0.58f, 0.46f, 1.05f);
             gluDisk(pObj, 0.0f, 0.45f, 26, 1);
+            gluCylinder(pObj, 0.45f, 0.0f, 0.75f, 26, 13);
         glPopMatrix();
     glPopMatrix();
 }
@@ -222,22 +270,20 @@ void desenharMuralha(GLUquadricObj *pObj, float x, float y, float z, float rotY)
         float altura = 1.0f;
         float espessura = 0.4f;
 
-        // -------------------------
-        // CORPO DA MURALHA (3D)
-        // -------------------------
-        glColor3f(0.6f, 0.6f, 0.6f);
+        // CORPO DA MURALHA 
+        glColor3f(1.0f, 0.75f, 0.8f);
         desenharCubo(largura, altura, espessura);
 
-        // -------------------------
-        // PORTA (3D)
-        // -------------------------
-        glPushMatrix();
-            glTranslatef(0.0f, 0.0f, espessura/2 + 0.01f);
+        // PORTA 
+        if(z == 1.2f){
+            glPushMatrix();
+                glTranslatef(0.0f, 0.0f, espessura/2 + 0.01f);
 
-            glColor3f(0.3f, 0.15f, 0.05f);
+                glColor3f(0.65f, 0.16f, 0.16f);
 
-            desenharCubo(0.6f, 0.7f, 0.1f);
-        glPopMatrix();
+                desenharCubo(0.6f, 0.7f, 0.1f);
+            glPopMatrix();
+        }
 
         float larguraDente = 0.2f;
         float alturaDente = 0.2f;
@@ -246,7 +292,7 @@ void desenharMuralha(GLUquadricObj *pObj, float x, float y, float z, float rotY)
             glPushMatrix();
                 glTranslatef(i + larguraDente/2, altura, 0.0f);
 
-                glColor3f(0.5f, 0.5f, 0.5f);
+                glColor3f(1.0f, 0.75f, 0.8f);
 
                 desenharCubo(larguraDente, alturaDente, espessura);
             glPopMatrix();
@@ -256,50 +302,50 @@ void desenharMuralha(GLUquadricObj *pObj, float x, float y, float z, float rotY)
 }
 
 /* Função principal de renderização */
-void drawGLScene(GLFWwindow* window)
+void drawGLScene(GLFWwindow* window, GLuint id)
 {
-    // Limpa os buffers de cor e profundidade antes de cada frame [cite: 105, 395, 396]
+    // Limpa os buffers de cor e profundidade 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-    // 1. Desenha o fundo 2D (Chama sua função que usa gluOrtho2D)
+    desenharFundo(id);
 
-    // 2. Prepara o objeto de quádricas do GLU [cite: 410, 420]
+    // 2. Prepara o objeto de quádricas 
     GLUquadricObj *pObj = gluNewQuadric();
-    gluQuadricNormals(pObj, GLU_SMOOTH); // Define normais suaves para iluminação [cite: 213]
+    gluQuadricNormals(pObj, GLU_SMOOTH);  
 
-    // 3. Inicia as transformações 3D [cite: 185, 344]
-    glPushMatrix(); // Salva o estado da matriz atual [cite: 204, 382]
+    // 3. Inicia as transformações 3D 
+    glPushMatrix(); // Salva o estado da matriz atual 
 
-        // Posicionamento da cena e controle de rotação pelo usuário [cite: 358, 359]
+        // Posicionamento da cena e controle de rotação pelo usuário 
         glTranslatef(0.0f, -1.0f, -7.0f); 
         glRotatef(yRot, 0.0f, 1.0f, 0.0f);
         glRotatef(xRot, 1.0f, 0.0f, 0.0f);
 
         // --- Gramado ---
-        // glColor3f(0.1f, 0.4f, 0.1f);
-        // glPushMatrix();
-        //     glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        //     gluDisk(pObj, 0.0f, 5.0f, 32, 1);
-        // glPopMatrix();
+         glColor3f(0.68f, 0.8f, 0.46f);
+         glPushMatrix();
+             glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+             gluDisk(pObj, 0.0f, 5.0f, 32, 1);
+         glPopMatrix();
 
         // --- Desenho das 4 Torres ---
-        // desenharTorre(pObj, -1.2f, 0.0f, -1.2f);
-        // desenharTorre(pObj,  1.2f, 0.0f, -1.2f);
-        // desenharTorre(pObj, -1.2f, 0.0f,  1.2f);
-        // desenharTorre(pObj,  1.2f, 0.0f,  1.2f);
+         desenharTorre(pObj, -1.4f, 0.0f, -1.4f);
+         desenharTorre(pObj,  1.4f, 0.0f, -1.4f);
+         desenharTorre(pObj, -1.4f, 0.0f,  1.4f);
+         desenharTorre(pObj,  1.4f, 0.0f,  1.4f);
 
         // --- Muralhas conectando as torres ---
-        desenharMuralha(pObj, 0.0f, 0.0f, -1.5f, 0.0f);   // Atrás
-    
+        desenharMuralha(pObj, 0.0f, 0.0f,  1.2f, 0.0f);
+        desenharMuralha(pObj, 0.0f, 0.0f, -1.2f, 0.0f);   
+        desenharMuralha(pObj, -1.2f, 0.0f, 0.0f, 90.0f);
+        desenharMuralha(pObj, 1.2f, 0.0f, 0.0f, 90.0f);
 
 
-
-    glPopMatrix(); // Restaura a matriz ao estado anterior [cite: 205, 385]
+    glPopMatrix(); // Restaura a matriz ao estado anterior 
 
     // Libera a memória do objeto de quádrica
     gluDeleteQuadric(pObj); 
 
-    // Força a execução dos comandos enviados ao pipeline [cite: 116]
     glFlush(); 
 }
 
@@ -311,7 +357,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Boneco", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Castelo", NULL, NULL);
     if (window == NULL)
     {
         printf("Failed to open GLFW window\n");
@@ -323,7 +369,6 @@ int main()
     glfwSetFramebufferSizeCallback(window, resizeWindow);
     glfwSwapInterval(1);
     
-    // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     resizeWindow(window, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -332,6 +377,7 @@ int main()
     //glfwSetCursorPosCallback(window, mouse_callback);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    GLuint fundoID = carregarTextura("fundo.jpg");
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -340,7 +386,7 @@ int main()
         handleKeyPress(window);
 
         // render
-        drawGLScene(window);
+        drawGLScene(window, fundoID);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
