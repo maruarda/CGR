@@ -71,7 +71,8 @@ void setupRC(){
   
     // Enable color tracking  
     glEnable(GL_COLOR_MATERIAL);  
-      
+    
+    glEnable(GL_NORMALIZE);  
     // Set Material properties to follow glColor values  
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);  
   
@@ -157,9 +158,9 @@ void drawGLScene(GLFWwindow* window)
 
 	// Main Body  
 	glPushMatrix(); // save transform matrix state
-		glTranslatef(0.0f, 0.0f, 0.0f);
-        glScalef(1.5f, 0.8f, 1.0f);
-		gluSphere(pObj, 0.48f, 52, 26);
+		glTranslatef(0.0f, 1.0f, 0.0f);
+        glScalef(0.7f, 0.8f, 0.7f);
+		gluSphere(pObj, 0.69f, 52, 26);
 	glPopMatrix(); // restore transform matrix state
 
     // Restore the matrix state  
