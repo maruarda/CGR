@@ -41,7 +41,7 @@ void resizeWindow(GLFWwindow* window, int w, int h )
     glLoadIdentity();  
   
     // Produce the perspective projection  
-    gluPerspective(35.0f, fAspect, 1.0, 40.0);  
+    gluPerspective(60.0f, fAspect, 1.0, 40.0);  
   
     glMatrixMode(GL_MODELVIEW);  
     glLoadIdentity();  
@@ -61,6 +61,8 @@ void setupRC(){
   
     // Enable lighting  
     glEnable(GL_LIGHTING);  
+
+    glEnable(GL_NORMALIZE);
   
     // Setup and enable light 0  
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT,whiteLight);  
@@ -71,8 +73,7 @@ void setupRC(){
   
     // Enable color tracking  
     glEnable(GL_COLOR_MATERIAL);  
-    
-    glEnable(GL_NORMALIZE);  
+      
     // Set Material properties to follow glColor values  
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);  
   
@@ -153,15 +154,90 @@ void drawGLScene(GLFWwindow* window)
 	pObj = gluNewQuadric();  
 	gluQuadricNormals(pObj, GLU_SMOOTH);  
 
-    //verde
-	glColor3f(0.56f, 0.93f, 0.53f);  
-
+    //cinza
+	glColor3f(0.5f, 0.5f, 0.5f);
 	// Main Body  
-	glPushMatrix(); // save transform matrix state
-		glTranslatef(0.0f, 1.0f, 0.0f);
-        glScalef(0.7f, 0.8f, 0.7f);
-		gluSphere(pObj, 0.69f, 52, 26);
+    glPushMatrix();
+        glTranslatef(0.0f, 0.8f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+
+        // cilindro
+        gluCylinder(pObj, 0.4f, 0.5f, 1.0f, 20, 20);
+
+        // base (parte de baixo)
+        glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f); // vira o disco
+            gluDisk(pObj, 0.0f, 0.4f, 20, 20);
+        glPopMatrix();
+
+    glPopMatrix();
+
+    //"ombros"
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix(); // save transform matrix state
+		glTranslatef(0.0f, 1.8f, 0.0f);
+        glScalef(1.25f, 0.56f, 1.25f);
+		gluSphere(pObj, 0.4f, 39, 19.5);
 	glPopMatrix(); // restore transform matrix state
+
+    //cabeça
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+        glTranslatef(0.0f, 1.9f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.25f, 0.25f, 0.68f, 20, 20);
+    glPopMatrix();
+
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix(); // save transform matrix state
+		glTranslatef(0.0f, 2.45f, 0.0f);
+        glScalef(0.9f, 1.1f, 0.9f);
+		gluSphere(pObj, 0.29f, 39, 19.5);
+	glPopMatrix(); // restore transform matrix state
+
+    //pernas
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+        glTranslatef(0.25f, 0.0f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.1f, 0.1f, 1.0f, 20, 20);
+    glPopMatrix();
+
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+        glTranslatef(-0.25f, 0.0f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.09f, 0.09f, 1.0f, 20, 20);
+    glPopMatrix();
+
+    //pés
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+        glTranslatef(0.25f, -0.25f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.2f, 0.09f, 0.25f, 20, 20);
+
+        // base (parte de baixo)
+        glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f); // vira o disco
+            gluDisk(pObj, 0.0f, 0.2f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+        glTranslatef(-0.25f, -0.25f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.2f, 0.09f, 0.25f, 20, 20);
+
+        // base (parte de baixo)
+        glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f); // vira o disco
+            gluDisk(pObj, 0.0f, 0.2f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    //braços
 
     // Restore the matrix state  
     glPopMatrix();  
