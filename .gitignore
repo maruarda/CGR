@@ -37,5 +37,4 @@ glad.c
 #// gcc boneco.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o boneco && ./boneco
 #// gcc robo.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o robo && ./robo
 
-bender.c
-bender
+opa.txt

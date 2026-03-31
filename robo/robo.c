@@ -1,4 +1,14 @@
 
+//A/Z ombro esquerdo
+//S/X cotovelo esquerdo
+//K/M ombro direito
+//L/, cotovelo direito
+//T/G quadril esquerdo
+//Y/H joelho esquerdo
+//U/J quadril direito
+//I/N joelho direito
+
+
 #define GLFW_INCLUDE_NONE
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +25,17 @@ void processInput(GLFWwindow *window);
 // Rotation
 static GLfloat xRot = 0.0f;
 static GLfloat yRot = 0.0f;
+
+// articulações
+static GLfloat shoulderLeft = -20.0f;
+static GLfloat shoulderRight = 20.0f;
+static GLfloat elbowLeft = -20.0f;
+static GLfloat elbowRight = 20.0f;
+
+static GLfloat hipLeft = 0.0f;
+static GLfloat hipRight = 0.0f;
+static GLfloat kneeLeft = 0.0f;
+static GLfloat kneeRight = 0.0f;
 
 //rotação com o mouse
 double lastX = 400, lastY = 300;
@@ -82,7 +103,6 @@ void setupRC(){
 
 }  
 
-/* function to handle key press events */
 void handleKeyPress(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -90,22 +110,65 @@ void handleKeyPress(GLFWwindow *window)
         exit(EXIT_SUCCESS);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) 
-        yRot -= 1.0f;  
-  
-    if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)  
-        yRot += 1.0f; 
-        
-     // cima / baixo
+    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        yRot -= 1.0f;
+
+    if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        yRot += 1.0f;
+
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
         xRot -= 1.0f;
 
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         xRot += 1.0f;
 
-    yRot = (GLfloat)((const int)yRot % 360);  
+    // braço esquerdo
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) shoulderLeft += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) shoulderLeft -= 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) elbowLeft += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) elbowLeft -= 1.0f;
+
+    // braço direito
+    if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) shoulderRight -= 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) shoulderRight += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) elbowRight -= 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS) elbowRight += 1.0f;
+
+    // perna esquerda
+    if(glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) hipLeft += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) hipLeft -= 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) kneeLeft += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) kneeLeft -= 1.0f;
+
+    // perna direita
+    if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) hipRight += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) hipRight -= 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) kneeRight += 1.0f;
+    if(glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) kneeRight -= 1.0f;
+
+    yRot = (GLfloat)((int)yRot % 360);
     xRot = (GLfloat)((int)xRot % 360);
 
+    // limites simples
+    if (shoulderLeft > 90) shoulderLeft = 90;
+    if (shoulderLeft < -90) shoulderLeft = -90;
+    if (shoulderRight > 90) shoulderRight = 90;
+    if (shoulderRight < -90) shoulderRight = -90;
+
+    if (elbowLeft > 120) elbowLeft = 120;
+    if (elbowLeft < -10) elbowLeft = -10;
+    if (elbowRight > 120) elbowRight = 120;
+    if (elbowRight < -10) elbowRight = -10;
+
+    if (hipLeft > 60) hipLeft = 60;
+    if (hipLeft < -60) hipLeft = -60;
+    if (hipRight > 60) hipRight = 60;
+    if (hipRight < -60) hipRight = -60;
+
+    if (kneeLeft > 120) kneeLeft = 120;
+    if (kneeLeft < 0) kneeLeft = 0;
+    if (kneeRight > 120) kneeRight = 120;
+    if (kneeRight < 0) kneeRight = 0;
 }
 
 //rotação com o mouse
@@ -132,6 +195,184 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     // Limitar rotação vertical (evita virar de cabeça pra baixo)
     if (xRot > 89.0f) xRot = 89.0f;
     if (xRot < -89.0f) xRot = -89.0f;
+}
+
+void drawRightArm(GLUquadricObj *pObj)
+{
+    glColor3f(0.47f, 0.53f, 0.6f);
+
+    glPushMatrix();
+        // pivô no ombro direito
+        glTranslatef(0.5f, 1.65f, 0.0f);
+        glRotatef(shoulderRight, 0.0f, 0.0f, 1.0f);
+
+        // junta do ombro
+        glPushMatrix();
+            glScalef(0.9f, 1.1f, 0.9f);
+            gluSphere(pObj, 0.12f, 20, 20);
+        glPopMatrix();
+
+        // braço superior
+        glPushMatrix();
+            glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+            gluCylinder(pObj, 0.09f, 0.09f, 0.75f, 20, 20);
+        glPopMatrix();
+
+        // cotovelo
+        glPushMatrix();
+            glTranslatef(0.75f, 0.0f, 0.0f);
+            gluSphere(pObj, 0.10f, 20, 20);
+
+            glRotatef(elbowRight, 0.0f, 0.0f, 1.0f);
+
+            // antebraço
+            glPushMatrix();
+                glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+                gluCylinder(pObj, 0.08f, 0.08f, 0.60f, 20, 20);
+            glPopMatrix();
+
+            // mão
+            glPushMatrix();
+                glTranslatef(0.59f, 0.0f, 0.0f);
+                glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+                gluCylinder(pObj, 0.09f, 0.2f, 0.25f, 20, 20);
+                glTranslatef(0.0f, 0.0f, 0.25f);
+                gluDisk(pObj, 0.0f, 0.2f, 20, 20);
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
+}
+
+void drawLeftArm(GLUquadricObj *pObj)
+{
+    glColor3f(0.47f, 0.53f, 0.6f);
+
+    glPushMatrix();
+        // pivô no ombro esquerdo
+        glTranslatef(-0.5f, 1.65f, 0.0f);
+        glRotatef(-shoulderLeft, 0.0f, 0.0f, 1.0f);
+
+        // junta do ombro
+        glPushMatrix();
+            glScalef(0.9f, 1.1f, 0.9f);
+            gluSphere(pObj, 0.12f, 20, 20);
+        glPopMatrix();
+
+        // braço superior
+        glPushMatrix();
+            glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+            gluCylinder(pObj, 0.09f, 0.09f, 0.75f, 20, 20);
+        glPopMatrix();
+
+        // cotovelo
+        glPushMatrix();
+            glTranslatef(-0.75f, 0.0f, 0.0f);
+            gluSphere(pObj, 0.10f, 20, 20);
+
+            glRotatef(-elbowLeft, 0.0f, 0.0f, 1.0f);
+
+            // antebraço
+            glPushMatrix();
+                glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+                gluCylinder(pObj, 0.08f, 0.08f, 0.60f, 20, 20);
+            glPopMatrix();
+
+            // mão
+            glPushMatrix();
+                glTranslatef(-0.59f, 0.0f, 0.0f);
+                glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+                gluCylinder(pObj, 0.09f, 0.2f, 0.25f, 20, 20);
+                glTranslatef(0.0f, 0.0f, 0.25f);
+                gluDisk(pObj, 0.0f, 0.2f, 20, 20);
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
+}
+
+void drawRightLeg(GLUquadricObj *pObj)
+{
+    glColor3f(0.47f, 0.53f, 0.6f);
+
+    glPushMatrix();
+        // pivô no quadril direito
+        glTranslatef(0.25f, 0.45f, 0.0f);
+        glRotatef(hipRight, 1.0f, 0.0f, 0.0f);
+
+        // coxa/perna superior
+        glPushMatrix();
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.09f, 0.09f, 0.60f, 20, 20);
+        glPopMatrix();
+
+        // joelho
+        glPushMatrix();
+            glTranslatef(0.0f, -0.3f, 0.0f);
+            gluSphere(pObj, 0.09f, 20, 20);
+
+            glRotatef(kneeRight, 1.0f, 0.0f, 0.0f);
+
+            // canela
+            glPushMatrix();
+                glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                gluCylinder(pObj, 0.08f, 0.08f, 0.45f, 20, 20);
+            glPopMatrix();
+
+            // pé
+            glPushMatrix();
+                glTranslatef(0.0f, -0.3f, 0.0f);
+                glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                gluCylinder(pObj, 0.2f, 0.09f, 0.25f, 20, 20);
+
+                glPushMatrix();
+                    glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+                    gluDisk(pObj, 0.0f, 0.2f, 20, 20);
+                glPopMatrix();
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
+}
+
+void drawLeftLeg(GLUquadricObj *pObj)
+{
+    glColor3f(0.47f, 0.53f, 0.6f);
+
+    glPushMatrix();
+        // pivô no quadril esquerdo
+        glTranslatef(-0.25f, 0.45f, 0.0f);
+        glRotatef(hipLeft, 1.0f, 0.0f, 0.0f);
+
+        // coxa/perna superior
+        glPushMatrix();
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.09f, 0.09f, 0.60f, 20, 20);
+        glPopMatrix();
+
+        // joelho
+        glPushMatrix();
+            glTranslatef(0.0f, -0.3f, 0.0f);
+            gluSphere(pObj, 0.09f, 20, 20);
+
+            glRotatef(kneeLeft, 1.0f, 0.0f, 0.0f);
+
+            // canela
+            glPushMatrix();
+                glRotatef(-90.0f, 0.7f, 0.0f, 0.0f);
+                gluCylinder(pObj, 0.08f, 0.08f, 0.45f, 20, 20);
+            glPopMatrix();
+
+            // pé
+            glPushMatrix();
+                glTranslatef(0.0f, -0.3f, 0.0f);
+                glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                gluCylinder(pObj, 0.2f, 0.09f, 0.25f, 20, 20);
+
+                glPushMatrix();
+                    glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+                    gluDisk(pObj, 0.0f, 0.2f, 20, 20);
+                glPopMatrix();
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
 }
 
 /* Here goes our drawing code */
@@ -266,111 +507,10 @@ void drawGLScene(GLFWwindow* window)
         gluCylinder(pObj, 0.2f, 0.2f, 0.29f, 20, 20);
     glPopMatrix();
 
-    //pernas
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(0.25f, 0.0f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        gluCylinder(pObj, 0.09f, 0.09f, 1.0f, 20, 20);
-    glPopMatrix();
-
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(-0.25f, 0.0f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        gluCylinder(pObj, 0.09f, 0.09f, 1.0f, 20, 20);
-    glPopMatrix();
-
-    //pés
-    //direito
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(0.25f, -0.25f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        gluCylinder(pObj, 0.2f, 0.09f, 0.25f, 20, 20);
-
-        glPushMatrix();
-            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
-            gluDisk(pObj, 0.0f, 0.2f, 20, 20);
-        glPopMatrix();
-    glPopMatrix();
-    //esquerdo
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(-0.25f, -0.25f, 0.0f);
-        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        gluCylinder(pObj, 0.2f, 0.09f, 0.25f, 20, 20);
-
-        glPushMatrix();
-            glRotatef(180.0f, 1.0f, 0.0f, 0.0f); 
-            gluDisk(pObj, 0.0f, 0.2f, 20, 20);
-        glPopMatrix();
-    glPopMatrix();
-
-    //braços
-    //bolinha antes dos braços
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(0.5f, 1.65f, 0.0f);
-        glScalef(0.9f, 1.1f, 0.9f);
-		gluSphere(pObj, 0.12f, 39, 19.5);
-    glPopMatrix();
-        
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(-0.5f, 1.65f, 0.0f);
-        glScalef(0.9f, 1.1f, 0.9f);
-		gluSphere(pObj, 0.12f, 39, 19.5);
-    glPopMatrix();
-
-    //braço esquerdo
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(0.0f, 1.65f, 0.0f);
-        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-        gluCylinder(pObj, 0.09f, 0.09f, 1.5f, 20, 20);
-    glPopMatrix();
-
-    //braço direito
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(0.0f, 1.65f, 0.0f);
-        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        gluCylinder(pObj, 0.09f, 0.09f, 1.5f, 20, 20);
-    glPopMatrix();
-
-    //mões
-    //direita
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(1.5f, 1.65f, 0.0f);
-        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        gluCylinder(pObj, 0.09f, 0.2f, 0.25f, 20, 20);
-    glPopMatrix();
-
-    //esquerda
-    glColor3f(0.47f, 0.53f, 0.6f);
-    glPushMatrix();
-        glTranslatef(-1.5f, 1.65f, 0.0f);
-        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-        gluCylinder(pObj, 0.09f, 0.2f, 0.25f, 20, 20);
-    glPopMatrix();
-
-    //tampa das mões
-    glPushMatrix();
-        glTranslatef(1.75f, 1.65f, 0.0f);
-        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        gluDisk(pObj, 0.0f, 0.2f, 20, 20);
-    glPopMatrix();
-
-    glPushMatrix();
-        glTranslatef(-1.75f, 1.65f, 0.0f);
-        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-        gluDisk(pObj, 0.0f, 0.2f, 20, 20);
-    glPopMatrix();
-
-
-
+    drawLeftArm(pObj);
+    drawRightArm(pObj);
+    drawLeftLeg(pObj);
+    drawRightLeg(pObj);
 
     // Restore the matrix state  
     glPopMatrix();  
@@ -424,4 +564,3 @@ int main()
     glfwTerminate();
     return 0;
 }
-
