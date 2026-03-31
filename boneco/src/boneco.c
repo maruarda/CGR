@@ -118,7 +118,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // invertido (movimento natural)
+    float yoffset = lastY - ypos; // invertido 
 
     lastX = xpos;
     lastY = ypos;
@@ -153,7 +153,6 @@ GLuint carregarTextura(const char* caminho) {
         printf("Sucesso: Imagem %s carregada (%dx%d)\n", caminho, largura, altura);
         GLenum formato = (canais == 4) ? GL_RGBA : GL_RGB;
         glTexImage2D(GL_TEXTURE_2D, 0, formato, largura, altura, 0, formato, GL_UNSIGNED_BYTE, dados);
-        // glGenerateMipmap foi removida para evitar o erro de declaração implícita
     } else {
         printf("Erro ao carregar textura: %s\n", caminho);
     }
@@ -166,29 +165,29 @@ GLuint carregarTextura(const char* caminho) {
 void desenharFundo(GLuint id) {
     glDisable(GL_DEPTH_TEST); 
     
-    glMatrixMode(GL_PROJECTION); // [cite: 369]
-    glPushMatrix(); // [cite: 382]
-    glLoadIdentity(); // [cite: 379]
+    glMatrixMode(GL_PROJECTION); 
+    glPushMatrix(); 
+    glLoadIdentity(); 
     gluOrtho2D(0, 800, 0, 600); 
 
-    glMatrixMode(GL_MODELVIEW); // [cite: 368]
+    glMatrixMode(GL_MODELVIEW); 
     glPushMatrix();
     glLoadIdentity();
 
     glColor3f(1.0f, 1.0f, 1.0f);
 
-    glEnable(GL_TEXTURE_2D); // [cite: 196]
+    glEnable(GL_TEXTURE_2D); 
     glBindTexture(GL_TEXTURE_2D, id);
 
-    glBegin(GL_QUADS); // [cite: 218]
+    glBegin(GL_QUADS); 
         glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
         glTexCoord2f(1.0f, 0.0f); glVertex2f(800.0f, 0.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex2f(800.0f, 600.0f);
         glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, 600.0f);
-    glEnd(); // [cite: 209]
+    glEnd(); 
 
     glDisable(GL_TEXTURE_2D);
-    glPopMatrix(); // [cite: 385]
+    glPopMatrix(); 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -203,7 +202,7 @@ void drawGLScene(GLFWwindow* window, GLuint id)
 
     desenharFundo(id);
 
-    GLUquadricObj *pObj;    // Quadric Object  
+    GLUquadricObj *pObj;      
       
     // Clear the window with current clearing color  
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
@@ -376,12 +375,8 @@ void drawGLScene(GLFWwindow* window, GLuint id)
 
 int main()
 {
-    // glfw: initialize and configure
-    // ------------------------------
     glfwInit();
 
-    // glfw window creation
-    // --------------------
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Boneco", NULL, NULL);
     if (window == NULL)
     {
@@ -394,7 +389,6 @@ int main()
     glfwSetFramebufferSizeCallback(window, resizeWindow);
     glfwSwapInterval(1);
     
-    // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     resizeWindow(window, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -414,13 +408,11 @@ int main()
         // render
         drawGLScene(window, fundoID);
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
     return 0;
 }
