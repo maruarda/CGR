@@ -34,7 +34,9 @@ KHR/
 teste.c
 glad.c
 
+#//linux:
 #// gcc boneco.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o boneco && ./boneco
 #// gcc robo.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o robo && ./robo
+#// gcc estrelinhas.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o estrelinhas && ./estrelinhas
 
 opa.txt
