@@ -35,8 +35,12 @@ teste.c
 glad.c
 
 #//linux:
-#// gcc boneco.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o boneco && ./boneco
-#// gcc robo.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o robo && ./robo
-#// gcc estrelinhas.c -I$Home/local/include -L$Home/local/lib -lglfw -lGL -lGLU -lm -o estrelinhas && ./estrelinhas
+#// gcc boneco.c -I$HOME/local/include -L$HOME/local/lib -lglfw -lGL -lGLU -lm -o boneco && ./boneco
+#// gcc robo.c -I$HOME/local/include -L$HOME/local/lib -lglfw -lGL -lGLU -lm -o robo && ./robo
+#// gcc estrelinhas.c -I$HOME/local/include -L$HOME/local/lib -lglfw -lGL -lGLU -lm -o estrelinhas && ./estrelinhas
+#// gcc chuva.c -I$HOME/local/include -L$HOME/local/lib -lglfw -lGL -lGLU -lm -o chuva && ./chuva
+
+# // gcc teste.c -I$HOME/local/include -L$HOME/local/lib -lglfw -lGL -lGLU -lm -o teste && ./teste
+
 
 opa.txt
