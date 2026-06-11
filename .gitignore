@@ -5,7 +5,6 @@
 
 # Objetos / intermediários
 *.o
-*.obj
 *.lo
 *.la
 *.al
