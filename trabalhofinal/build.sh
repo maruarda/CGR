@@ -2,8 +2,6 @@
 # ============================================================
 # build.sh
 #
-# Compila e roda o trabalho final, no mesmo estilo do comando
-# usado nos trabalhos anteriores (gcc direto, sem CMake).
 #
 # Uso:
 #   ./build.sh          -> compila e roda
@@ -12,7 +10,7 @@
 
 set -e  # para o script se algum comando falhar
 
-SOURCES="src/main.c src/shader.c src/camera.c src/profile.c src/mesh.c src/sweep.c external/glad/src/glad.c"
+SOURCES="src/main.c src/shader.c src/camera.c src/profile.c src/mesh.c src/sweep.c src/texture.c external/glad/src/glad.c"
 INCLUDES="-Iinclude -Iexternal/glad/include -I$HOME/local/include"
 LIBS_PATH="-L$HOME/local/lib"
 LIBS="-lglfw -lGL -lGLU -lm -ldl"

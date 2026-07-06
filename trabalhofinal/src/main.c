@@ -5,8 +5,12 @@
  *   - abrir janela/contexto OpenGL (GLFW + glad)
  *   - tratar input (mouse orbita a câmera, scroll dá zoom,
  *     tecla W alterna wireframe)
- *   - gerar a malha via sweep_generate_rotational()
- *   - loop de render aplicando o shader Phong
+ *   - gerar DOIS objetos lado a lado:
+ *       - uma rosquinha (donut), via sweep ROTACIONAL
+ *       - um "tubo" tipo lata de refrigerante, via sweep
+ *         TRANSLACIONAL (extrusão ao longo de um caminho reto)
+ *   - carregar as texturas de cada objeto
+ *   - loop de render aplicando o shader Phong + textura
  *
  * ============================================================ */
 
@@ -21,6 +25,7 @@
 #include "mesh.h"
 #include "sweep.h"
 #include "profile.h"
+#include "texture.h"
 
 static Camera g_camera;
 static int g_wireframe = 0;
@@ -70,6 +75,9 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
         g_wireframe = !g_wireframe;
         glPolygonMode(GL_FRONT_AND_BACK, g_wireframe ? GL_LINE : GL_FILL);
     }
+    /* TODO: teclas +/- para aumentar/diminuir 'steps' e regenerar
+     * a malha em tempo real (chamar mesh_free + sweep_generate_rotational
+     * de novo com um valor diferente de steps). Bom "plus" para a nota. */
 }
 
 int main(void) {
@@ -82,7 +90,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(1024, 768, "Sweep", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1024, 768, "Sweep - Donut e Lata", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Falha ao criar janela\n");
         glfwTerminate();
@@ -103,37 +111,66 @@ int main(void) {
 
     glEnable(GL_DEPTH_TEST);
 
-    /* --- monta o shader --- */
+    /* --- monta o shader (compartilhado pelos dois objetos) --- */
     unsigned int shader = shader_load("shaders/vertex.glsl", "shaders/fragment.glsl");
 
-    /* --- gera a malha via sweep rotacional --- */
+    /* ============================================================
+     * OBJETO 1: donut (rosquinha), sweep ROTACIONAL
+     * Perfil = um pequeno círculo (o "tubo" do donut) deslocado do
+     * eixo Y; ao girar em torno do eixo, gera a rosquinha inteira.
+     * ============================================================ */
+    int donut_profile_count = 32;                 /* suavidade do tubo do donut */
+    ProfilePoint *donut_profile = profile_generate_torus_ring(donut_profile_count, 1.2f, 0.5f);
+    int donut_steps = 48;                          /* suavidade da volta grande */
+    Mesh donut_mesh = sweep_generate_rotational(donut_profile, donut_profile_count, donut_steps, /*profile_closed=*/1);
+    free(donut_profile); /* já foi copiado para dentro da mesh, pode liberar */
 
-    /* OPÇÃO A: vaso (perfil aberto) 
-    int profile_count;
-    const ProfilePoint *profile = profile_get_vase(&profile_count); */
-    //int steps = 48; /* divisões angulares: mais alto = mais suave */
-    //Mesh mesh = sweep_generate_rotational(profile, profile_count, steps, /*profile_closed=*/0);
+    /* ============================================================
+     * OBJETO 2: tubo tipo lata de refrigerante, sweep TRANSLACIONAL
+     * Perfil = círculo simples centrado na origem (major_radius = 0),
+     * usado como seção transversal; o caminho é reto, de baixo para
+     * cima, "extrudando" esse círculo e formando o corpo da lata.
+     * ============================================================ */
+    int can_profile_count = 32;                    /* suavidade da circunferência da lata */
+    ProfilePoint *can_profile = profile_generate_torus_ring(can_profile_count, 0.0f, 0.55f);
+    vec3 can_path[2] = {
+        vec3_make(0.0f, -1.0f, 0.0f), /* base da lata   */
+        vec3_make(0.0f,  1.0f, 0.0f)  /* topo da lata   */
+    };
+    Mesh can_mesh = sweep_generate_translational(can_profile, can_profile_count, can_path, 2, /*add_caps=*/1);
+    free(can_profile);
 
-    /* OPÇÃO B: torus / rosquinha (perfil fechado) */
-
-    int profile_count = 24;                 // suavidade do "tubo" do donut
-    ProfilePoint *profile = profile_generate_torus_ring(profile_count, 1.2f, 0.5f);
-    int steps = 48;                          // suavidade do laço grande
-    Mesh mesh = sweep_generate_rotational(profile, profile_count, steps, 1);
-    free(profile); // já foi copiado para dentro da mesh, pode liberar
-
+    /* --- carrega as texturas de cada objeto --- */
+    unsigned int donut_texture = texture_load("assets/donut_texture.png");
+    unsigned int can_texture = texture_load("assets/can_texture.png");
 
     camera_init(&g_camera);
-    g_camera.radius = 6.0f;
+    g_camera.radius = 7.0f;
 
-    /* modelo centralizado; sobe um pouco para ficar visível na tela */
-    float model[16];
-    mat4_translate(model, vec3_make(0.0f, -1.0f, 0.0f));
+    /* matrizes de modelo: os dois objetos lado a lado no eixo X.
+     * O donut fica "deitado" (girado 90 graus em X) para mostrar o
+     * "buraco" de frente para a câmera, como um donut de vitrine. */
+    float donut_model[16];
+    {
+        /* rotaciona 90 graus em torno do eixo X para deitar o donut.
+         * mathutils.h só tem rotate_y pronto, então aplicamos a
+         * rotação em X manualmente aqui mesmo. */
+        float rx[16];
+        mat4_identity(rx);
+        float c = cosf(1.5707963f), s = sinf(1.5707963f); /* 90 graus */
+        rx[5] = c;  rx[9]  = -s;
+        rx[6] = s;  rx[10] = c;
+
+        float t[16];
+        mat4_translate(t, vec3_make(-2.2f, 0.0f, 0.0f));
+        mat4_multiply(donut_model, t, rx);
+    }
+
+    float can_model[16];
+    mat4_translate(can_model, vec3_make(2.2f, 0.0f, 0.0f));
 
     while (!glfwWindowShouldClose(window)) {
-        /* Cor de fundo (R, G, B, A), cada valor de 0.0 a 1.0.
-         * Exemplos: cinza-claro (0.85, 0.85, 0.85), azul-céu (0.53, 0.81, 0.92),
-         * branco (1.0, 1.0, 1.0), preto (0.0, 0.0, 0.0). */
+        /* Cor de fundo (R, G, B, A), cada valor de 0.0 a 1.0. */
         glClearColor(0.55f, 0.65f, 0.75f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -143,7 +180,6 @@ int main(void) {
         camera_get_view_matrix(&g_camera, view);
         mat4_perspective(projection, 45.0f * (float)M_PI / 180.0f, 1024.0f / 768.0f, 0.1f, 100.0f);
 
-        shader_set_mat4(shader, "model", model);
         shader_set_mat4(shader, "view", view);
         shader_set_mat4(shader, "projection", projection);
 
@@ -151,15 +187,26 @@ int main(void) {
         shader_set_vec3(shader, "viewPos", eye.x, eye.y, eye.z);
         shader_set_vec3(shader, "lightPos", 4.0f, 5.0f, 4.0f);
         shader_set_vec3(shader, "lightColor", 1.0f, 1.0f, 1.0f);
-        shader_set_vec3(shader, "objectColor", 0.75f, 0.55f, 0.35f);
+        shader_set_int(shader, "diffuseTexture", 0); /* sempre usa a unidade de textura 0 */
 
-        mesh_draw(&mesh);
+        /* --- desenha o donut --- */
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, donut_texture);
+        shader_set_mat4(shader, "model", donut_model);
+        mesh_draw(&donut_mesh);
+
+        /* --- desenha a lata --- */
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, can_texture);
+        shader_set_mat4(shader, "model", can_model);
+        mesh_draw(&can_mesh);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    mesh_free(&mesh);
+    mesh_free(&donut_mesh);
+    mesh_free(&can_mesh);
     glfwTerminate();
     return 0;
 }

@@ -13,6 +13,7 @@
 typedef struct {
     float px, py, pz; /* posição */
     float nx, ny, nz; /* normal  */
+    float u, v;        /* coordenada de textura (0..1) */
 } Vertex;
 
 typedef struct {
@@ -26,7 +27,7 @@ typedef struct {
 } Mesh;
 
 /* Envia os dados de 'vertices'/'indices' já preenchidos para a GPU
- * e configura os atributos do vertex shader (posição=0, normal=1). */
+ * e configura os atributos do vertex shader (posição=0, normal=1, uv=2). */
 void mesh_upload(Mesh *mesh);
 
 void mesh_draw(const Mesh *mesh);

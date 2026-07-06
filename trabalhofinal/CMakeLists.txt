@@ -10,8 +10,8 @@ add_executable(trabalhofinal
     src/profile.c
     src/mesh.c
     src/sweep.c
-    external/glad/src/glad.c 
-)
+    src/texture.c
+    external/glad/src/glad.c   
 
 target_include_directories(trabalhofinal PRIVATE
     include
@@ -20,3 +20,4 @@ target_include_directories(trabalhofinal PRIVATE
 
 find_package(glfw3 REQUIRED)
 target_link_libraries(trabalhofinal glfw ${CMAKE_DL_LIBS})
+
