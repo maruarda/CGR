@@ -8,12 +8,6 @@
  * o sólido 3D. Cada ponto é (raio, altura): raio = distância
  * ao eixo de rotação, altura = posição no eixo Y.
  *
- * Por enquanto os pontos são fixos (hardcoded), representando
- * a silhueta de um vaso/cálice. Como próximo passo, dá pra:
- *   - carregar de um arquivo texto
- *   - deixar o usuário desenhar clicando na tela
- *   - suavizar com uma curva Catmull-Rom / Bézier em vez de
- *     segmentos retos entre os pontos de controle
  * ============================================================ */
 
 typedef struct {

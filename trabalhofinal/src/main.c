@@ -70,9 +70,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
         g_wireframe = !g_wireframe;
         glPolygonMode(GL_FRONT_AND_BACK, g_wireframe ? GL_LINE : GL_FILL);
     }
-    /* TODO: teclas +/- para aumentar/diminuir 'steps' e regenerar
-     * a malha em tempo real (chamar mesh_free + sweep_generate_rotational
-     * de novo com um valor diferente de steps). Bom "plus" para a nota. */
 }
 
 int main(void) {
@@ -85,7 +82,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(1024, 768, "Sweep - Superficie de Revolucao", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1024, 768, "Sweep", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Falha ao criar janela\n");
         glfwTerminate();

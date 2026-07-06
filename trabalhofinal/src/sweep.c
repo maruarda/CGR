@@ -53,7 +53,7 @@ Mesh sweep_generate_rotational(const ProfilePoint *profile, int profile_count, i
     /* --- Passo 1: gerar os vértices, anel por anel ---
      * Cada "anel" é o perfil inteiro rotacionado por um ângulo.
      * Não duplicamos o anel final (ring == steps) porque ele
-     * fecha exatamente sobre o anel 0 — conectamos via módulo
+     * fecha exatamente sobre o anel 0, conectamos via módulo
      * na etapa de índices abaixo. */
     for (int ring = 0; ring < steps; ring++) {
         float angle = ring * (2.0f * (float)M_PI / (float)steps);
