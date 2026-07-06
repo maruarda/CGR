@@ -1,5 +1,7 @@
 #include "profile.h"
 #include <stddef.h>
+#include <stdlib.h>
+#include <math.h>
 
 /* Perfil de exemplo: silhueta de um vaso, de baixo para cima.
  * (raio, altura) — ajuste esses valores à vontade para testar
@@ -19,4 +21,19 @@ static const ProfilePoint vase_points[] = {
 const ProfilePoint *profile_get_vase(int *out_count) {
     *out_count = (int)(sizeof(vase_points) / sizeof(vase_points[0]));
     return vase_points;
+}
+
+ProfilePoint *profile_generate_torus_ring(int subdivisions, float major_radius, float minor_radius) {
+    ProfilePoint *points = malloc(subdivisions * sizeof(ProfilePoint));
+
+    /* Percorre um círculo completo (0 a 2*PI) no plano (raio, altura):
+     * cada ponto fica a 'minor_radius' de distância do centro do tubo,
+     * que por sua vez está a 'major_radius' do eixo Y. */
+    for (int i = 0; i < subdivisions; i++) {
+        float t = i * (2.0f * (float)M_PI / (float)subdivisions);
+        points[i].radius = major_radius + minor_radius * cosf(t);
+        points[i].height = minor_radius * sinf(t);
+    }
+
+    return points;
 }

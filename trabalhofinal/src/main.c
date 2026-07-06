@@ -8,14 +8,12 @@
  *   - gerar a malha via sweep_generate_rotational()
  *   - loop de render aplicando o shader Phong
  *
- * chmod +x build.sh    # só na primeira vez, dá permissão de execução
-*  ./build.sh            # compila e já roda
-*  ./build.sh build       # só compila, sem rodar (útil se quiser testar erros antes de abrir a janela)
  * ============================================================ */
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "mathutils.h"
 #include "shader.h"
@@ -112,10 +110,21 @@ int main(void) {
     unsigned int shader = shader_load("shaders/vertex.glsl", "shaders/fragment.glsl");
 
     /* --- gera a malha via sweep rotacional --- */
+
+    /* OPÇÃO A: vaso (perfil aberto) 
     int profile_count;
-    const ProfilePoint *profile = profile_get_vase(&profile_count);
-    int steps = 48; /* divisões angulares: mais alto = mais suave */
-    Mesh mesh = sweep_generate_rotational(profile, profile_count, steps);
+    const ProfilePoint *profile = profile_get_vase(&profile_count); */
+    //int steps = 48; /* divisões angulares: mais alto = mais suave */
+    //Mesh mesh = sweep_generate_rotational(profile, profile_count, steps, /*profile_closed=*/0);
+
+    /* OPÇÃO B: torus / rosquinha (perfil fechado) */
+
+    int profile_count = 24;                 // suavidade do "tubo" do donut
+    ProfilePoint *profile = profile_generate_torus_ring(profile_count, 1.2f, 0.5f);
+    int steps = 48;                          // suavidade do laço grande
+    Mesh mesh = sweep_generate_rotational(profile, profile_count, steps, 1);
+    free(profile); // já foi copiado para dentro da mesh, pode liberar
+
 
     camera_init(&g_camera);
     g_camera.radius = 6.0f;
@@ -125,7 +134,10 @@ int main(void) {
     mat4_translate(model, vec3_make(0.0f, -1.0f, 0.0f));
 
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.75f, 0.75f, 0.78f, 1.0f);
+        /* Cor de fundo (R, G, B, A), cada valor de 0.0 a 1.0.
+         * Exemplos: cinza-claro (0.85, 0.85, 0.85), azul-céu (0.53, 0.81, 0.92),
+         * branco (1.0, 1.0, 1.0), preto (0.0, 0.0, 0.0). */
+        glClearColor(0.55f, 0.65f, 0.75f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shader);

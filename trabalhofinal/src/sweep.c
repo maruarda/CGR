@@ -13,10 +13,17 @@ static int vertex_index(int ring, int point, int profile_count) {
  * ponto 'j', usando diferença central (ou forward/backward nas pontas).
  * A normal da curva 2D é a tangente rotacionada 90 graus. */
 static void profile_normal_2d(const ProfilePoint *profile, int count, int j,
-                               float *out_nr, float *out_ny) {
+                               int closed, float *out_nr, float *out_ny) {
     float dr, dy;
 
-    if (j == 0) {
+    if (closed) {
+        /* laço fechado: os "vizinhos" de qualquer ponto, incluindo as
+         * pontas, sempre existem via módulo (wraparound). */
+        int prev = (j - 1 + count) % count;
+        int next = (j + 1) % count;
+        dr = profile[next].radius - profile[prev].radius;
+        dy = profile[next].height - profile[prev].height;
+    } else if (j == 0) {
         dr = profile[1].radius - profile[0].radius;
         dy = profile[1].height - profile[0].height;
     } else if (j == count - 1) {
@@ -37,7 +44,7 @@ static void profile_normal_2d(const ProfilePoint *profile, int count, int j,
     *out_ny = ny / len;
 }
 
-Mesh sweep_generate_rotational(const ProfilePoint *profile, int profile_count, int steps) {
+Mesh sweep_generate_rotational(const ProfilePoint *profile, int profile_count, int steps, int profile_closed) {
     Mesh mesh = {0};
 
     mesh.vertex_count = steps * profile_count;
@@ -67,26 +74,34 @@ Mesh sweep_generate_rotational(const ProfilePoint *profile, int profile_count, i
             /* normal: pega a normal 2D da curva no plano (r,y) e aplica
              * a mesma rotação angular à componente radial */
             float nr, ny;
-            profile_normal_2d(profile, profile_count, j, &nr, &ny);
+            profile_normal_2d(profile, profile_count, j, profile_closed, &nr, &ny);
             mesh.vertices[idx].nx = nr * s;
             mesh.vertices[idx].ny = ny;
             mesh.vertices[idx].nz = nr * c;
         }
     }
 
-    /* --- Passo 2: gerar os índices (2 triângulos por "quad" da malha) --- */
-    mesh.index_count = steps * (profile_count - 1) * 6;
+    /* --- Passo 2: gerar os índices (2 triângulos por "quad" da malha) ---
+     * 'segments' é quantos "degraus" existem na direção do perfil: se o
+     * perfil é aberto (vaso), são profile_count - 1 (não fecha nas pontas);
+     * se é fechado (torus), são profile_count (o último ponto conecta de
+     * volta ao primeiro). */
+    int segments = profile_closed ? profile_count : (profile_count - 1);
+    mesh.index_count = steps * segments * 6;
     mesh.indices = malloc(mesh.index_count * sizeof(unsigned int));
 
     int k = 0;
     for (int ring = 0; ring < steps; ring++) {
         int next_ring = (ring + 1) % steps; /* fecha o "cilindro" */
 
-        for (int j = 0; j < profile_count - 1; j++) {
+        for (int seg = 0; seg < segments; seg++) {
+            int j = seg;
+            int j_next = profile_closed ? (seg + 1) % profile_count : seg + 1;
+
             unsigned int a = vertex_index(ring, j, profile_count);
-            unsigned int b = vertex_index(ring, j + 1, profile_count);
+            unsigned int b = vertex_index(ring, j_next, profile_count);
             unsigned int c = vertex_index(next_ring, j, profile_count);
-            unsigned int d = vertex_index(next_ring, j + 1, profile_count);
+            unsigned int d = vertex_index(next_ring, j_next, profile_count);
 
             /* triângulo 1: a, c, b */
             mesh.indices[k++] = a;
